@@ -14,7 +14,7 @@ import models.RawModel;
 
 public class OBJLoader {
 	
-	public static RawModel loadObjModel(String fileName, Loader loader){
+	public static RawModel loadObjModel(String fileName, Loader loader, boolean hasPhysics){
 		FileReader fr = null;
 		try {
 			fr = new FileReader(new File("res/"+fileName+".obj"));
@@ -70,6 +70,17 @@ public class OBJLoader {
 				String[] vertex1 = currentLine[1].split("/");
 				String[] vertex2 = currentLine[2].split("/");
 				String[] vertex3 = currentLine[3].split("/");
+
+				//if there are no texture coords
+				if (vertex1[1].equals("")) {
+					vertex1[1] = "1";
+				}
+				if (vertex2[1].equals("")) {
+					vertex2[1] = "1";
+				}
+				if (vertex3[1].equals("")) {
+					vertex3[1] = "1";
+				}
 				
 				processVertex(vertex1,indices,textures,normals,textureArray,normalsArray);
 				processVertex(vertex2,indices,textures,normals,textureArray,normalsArray);
@@ -96,7 +107,17 @@ public class OBJLoader {
 		for(int i=0; i<indices.size(); i++){
 			indicesArray[i] = indices.get(i);
 		}
-		return loader.loadtoVAO(verticesArray, textureArray, normalsArray, indicesArray);
+
+		float radius = 0;
+		if (hasPhysics) {
+			for (Vector3f vertex :vertices) {
+				float length = vertex.length();
+				if (length > radius) {
+					radius = length;
+				}
+			}
+		}
+		return loader.loadtoVAO(verticesArray, textureArray, normalsArray, indicesArray, radius);
 
 	}
 	

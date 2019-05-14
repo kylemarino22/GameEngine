@@ -3,11 +3,15 @@ package models;
 public class RawModel {
 
 	private int vaoID;
+	private int cl_vaoID;
 	private int vertexCount;
+	private float radius;
 	
-	public RawModel(int vaoID, int vertexCount){
+	public RawModel(int vaoID, int cl_vaoID, int vertexCount, float radius){
 		this.vaoID = vaoID;
+		this.cl_vaoID = cl_vaoID;
 		this.vertexCount = vertexCount;
+		this.radius = radius;
 	}
 	
 	public int getVaoID() {
@@ -25,4 +29,6 @@ public class RawModel {
 	public void setVertexCount(int vertexCount) {
 		this.vertexCount = vertexCount;
 	}
+
+	public float getRadius() { return radius; }
 }

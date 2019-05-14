@@ -17,6 +17,7 @@ import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
 import models.RawModel;
+import physicsEngine.CL_Loader;
 
 public class Loader {
 	
@@ -25,15 +26,20 @@ public class Loader {
 	private ArrayList<Integer> textures = new ArrayList<Integer>();
 
 	
-	public RawModel loadtoVAO(float[] positions, float[] textureCoords, float[] normals, int[] indices){
+	public RawModel loadtoVAO(float[] positions, float[] textureCoords, float[] normals, int[] indices, float radius){
 		int vaoID = createVAO();
 		bindIndicesBuffer(indices);
 		storeDataInAttributeList(0,3,positions);
 		storeDataInAttributeList(1,2,textureCoords);
 		storeDataInAttributeList(2,3,normals);
 
-		unbindVAO(); 
-		return new RawModel(vaoID,indices.length);
+		unbindVAO();
+
+		int cl_vaoID = -1;
+		if (radius > 0) {
+			cl_vaoID = CL_Loader.createVAO(positions, normals, indices);
+		}
+		return new RawModel(vaoID, cl_vaoID, indices.length, radius);
 	}
 	
 	public int loadTexture(String fileName){

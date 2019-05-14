@@ -21,7 +21,11 @@ public class DisplayManager {
 		
 		try {
 			Display.setDisplayMode(new DisplayMode(WIDTH,HEIGHT));
-			Display.create(new PixelFormat(), attribs);
+			Display.create(new PixelFormat(
+					/*Alpha Bits*/8,
+					/*Depth bits*/ 8,
+					/*Stencil bits*/ 0,
+					/*samples*/8), attribs);
 			Display.setTitle("Game");
 		}
 		catch (LWJGLException e) {

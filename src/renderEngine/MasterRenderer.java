@@ -76,6 +76,7 @@ public class MasterRenderer {
 	public void processTerrain(Terrain terrain){
 		terrains.add(terrain);
 	}
+
 	public void processEntity(Entity entity){
 		TexturedModel entityModel = entity.getModel();
 		List<Entity> batch = entities.get(entityModel);

@@ -47,6 +47,7 @@ public abstract class ShaderProgram {
 	}
 	
 	protected void loadBoolean(int location, boolean value){
+
 		float toLoad = 0;
 		if(value){
 			toLoad = 1;

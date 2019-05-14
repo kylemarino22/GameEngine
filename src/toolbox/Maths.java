@@ -33,4 +33,8 @@ public class Maths {
 		return viewMatrix;
 		
 	}
+
+	public static Vector3f difference (Vector3f a, Vector3f b) {
+		return new Vector3f(a.x-b.x, a.y-b.y, a.z-b.z);
+	}
 }
