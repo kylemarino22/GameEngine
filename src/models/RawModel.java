@@ -18,6 +18,8 @@ public class RawModel {
 		return vaoID;
 	}
 
+	public int getCl_vaoID() { return cl_vaoID; }
+
 	public void setVaoID(int vaoID) {
 		this.vaoID = vaoID;
 	}

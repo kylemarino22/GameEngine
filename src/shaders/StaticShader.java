@@ -45,9 +45,6 @@ public class StaticShader extends ShaderProgram{
 		location_reflectivity = super.getUniformLocation("reflectivity");
 		location_useFakeLighting = super.getUniformLocation("useFakeLighting");
 		location_skyColor = super.getUniformLocation("skyColor");
-
-
-
 	}
 	
 	public void loadSkyColor(float r, float g, float b ){
@@ -80,7 +77,6 @@ public class StaticShader extends ShaderProgram{
 	public void loadLight(Light light){
 		super.loadVector(location_lightPosition, light.getPosition());
 		super.loadVector(location_lightColor, light.getColor());
-
 	}
 	
 }

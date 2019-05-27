@@ -1,0 +1,4 @@
+kernel void Kernel1 (global float *answer) {
+    unsigned int xid = get_global_id(0);
+    answer[xid] = 1;
+}

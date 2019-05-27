@@ -4,6 +4,7 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 import entities.Camera;
+import org.lwjgl.util.vector.Vector4f;
 
 public class Maths {
 
@@ -36,5 +37,31 @@ public class Maths {
 
 	public static Vector3f difference (Vector3f a, Vector3f b) {
 		return new Vector3f(a.x-b.x, a.y-b.y, a.z-b.z);
+	}
+
+	public static Vector3f extendVector (Vector3f a, float b) {
+		return new Vector3f(
+				Math.copySign(Math.abs(a.x) + b, a.x),
+				Math.copySign(Math.abs(a.y) + b, a.y),
+				Math.copySign(Math.abs(a.z) + b, a.z));
+	}
+
+	public static Vector3f scale(Vector3f a, float b) {
+		return new Vector3f(
+				a.x *b,
+				a.y *b,
+				a.z*b);
+	}
+
+	public static Vector4f scale(Vector4f a, float b) {
+		return new Vector4f(
+				a.x *b,
+				a.y *b,
+				a.z*b,
+				a.w*b);
+	}
+
+	public static Vector3f to3f (Vector4f a) {
+		return new Vector3f(a.x, a.y, a.z);
 	}
 }

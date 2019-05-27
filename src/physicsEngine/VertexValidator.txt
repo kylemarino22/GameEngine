@@ -1,0 +1,19 @@
+kernel void vertexValidator (__constant float *uniforms, global const float *positions, global float *output) {
+    unsigned int xid = get_global_id(0);
+    float totalX = positions[3*xid] - uniforms[1];
+    float totalY = positions[3*xid + 1] - uniforms[2];
+    float totalZ = positions[3*xid + 2] - uniforms[3];
+    float totalLength = totalX * totalX + totalY * totalY + totalZ * totalZ;
+
+    if (totalLength < uniforms[0]) {
+        output[3*xid] = positions[3*xid];
+        output[3*xid + 1] = positions[3*xid + 1];
+        output[3*xid + 2] = positions[3*xid + 2];
+    }
+    else {
+        output[3*xid] = FLT_MAX;
+        output[3*xid + 1] = FLT_MAX;
+        output[3*xid + 2] = FLT_MAX;
+    }
+
+}

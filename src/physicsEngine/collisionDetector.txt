@@ -1,0 +1,103 @@
+kernel void collisionDetector (__constant float *uniforms, global const unsigned int *indices, global const float *positions, global const float *normals, global const float *edgeNormals, global float *output) {
+
+    unsigned int xid = get_global_id(0);
+
+    unsigned int index0 = indices[xid*3]*3;
+    unsigned int index1 = indices[xid*3 + 1]*3;
+    unsigned int index2 = indices[xid*3 + 2]*3;
+
+    #Get centroid for face velocity
+    float v[3];
+    v[0] = (positions[index0] + positions[index1] + positions[index2]) /3;
+    v[1] = (positions[index0 + 1] + positions[index1 + 1] + positions[index2 + 2]) /3;
+    v[2] = (positions[index0 + 2] + positions[index1 + 1] + positions[index2 + 2]) /3;
+
+
+    float v0 = uniforms[19];
+    float v1 = uniforms[20];
+    float v2 = uniforms[21];
+    for (unsigned int i = 0; i < 3; i++) {
+
+        v0 += uniforms[4*i+7] * v[i];
+        v1 += uniforms[74*i + 8] * v[i];
+        v2 += uniforms[4*i + 9] * v[i];
+    }
+
+    v0 = uniforms[4] - (v0 - v[0])/uniforms[0];
+    v1 = uniforms[5] - (v1 - v[1])/uniforms[0];
+    v2 = uniforms[6] - (v2 - v[2])/uniforms[0];
+
+
+    #Check if normal faces velocity vector, invert normal vector
+    float den = normals[3*xid] * v0 + normals[3*xid + 1] * v1 + normals[3*xid + 2] * v2;
+    if (den >= 0) {
+        output[xid*4] = FLT_MAX;
+        return;
+    }
+
+    float p0 = uniforms[1] - positions[index0];
+    float p1 = uniforms[2] - positions[index0 + 1];
+    float p2 = uniforms[3] - positions[index0 + 2];
+
+    float num = normals[3*xid] * p0 + normals[3*xid + 1] * p1 + normals[3*xid + 2] * p2;
+
+    #if normal faces point
+    if (num < 0) {
+        output[xid*4] = FLT_MAX;
+        return;
+    }
+
+    #calculate t
+
+    float t = -num/den;
+
+    if (t > uniforms[0]) {
+        output[xid*4] = FLT_MAX;
+        return;
+    }
+
+    #Point on the plane
+    float c0 = uniforms[1] + uniforms[4] * t;
+    float c1 = uniforms[2] + uniforms[5] * t;
+    float c2 = uniforms[3] + uniforms[6] * t;
+
+    #Check Edge 0
+    p0 = c0 - positions[index1];
+    p1 = c1 - positions[index1+1];
+    p2 = c2 - positions[index1+2];
+
+    float dot = edgeNormals[xid*9] * p0 + edgeNormals[xid*9 + 1] * p1 + edgeNormals[xid*9 + 2] * p2;
+
+    if (dot > 0.00001) {
+        output[xid*4] = FLT_MAX;
+        return;
+    }
+
+    #Check Edge 1
+    dot = edgeNormals[xid*9 + 3] * p0 + edgeNormals[xid*9 + 4] * p1 + edgeNormals[xid*9 + 5] * p2;
+
+    if (dot > 0.00001) {
+        output[xid*4] = FLT_MAX;
+        return;
+    }
+
+    #Check Edge 2
+    p0 = c0 - positions[index0];
+    p1 = c1 - positions[index0+1];
+    p2 = c2 - positions[index0+2];
+
+    dot = edgeNormals[xid*9 + 6] * p0 + edgeNormals[xid*9 + 7] * p1 + edgeNormals[xid*9 + 8] * p2;
+
+    if (dot > 0.00001) {
+        output[xid*4] = FLT_MAX;
+        return;
+    }
+
+    #Valid Collision. Store in output
+    output[xid*4] = t;
+    output[xid*4 + 1] = c0;
+    output[xid*4 + 2] = c1;
+    output[xid*4 + 3] = c2;
+
+
+}

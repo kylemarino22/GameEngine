@@ -1,0 +1,18 @@
+kernel void vectorTransformer (__constant float *uniforms, global const float *positions, global float *output) {
+    unsigned int xid = get_global_id(0);
+
+    float v0 = uniforms[12];
+    float v1 = uniforms[13];
+    float v2 = uniforms[14];
+    for (unsigned int i = 0; i < 3; i++) {
+
+        v0 += uniforms[4*i] * positions[3*xid + i];
+        v1 += uniforms[4*i + 1] * positions[3*xid + i];
+        v2 += uniforms[4*i + 2] * positions[3*xid + i];
+    }
+
+
+    output[3*xid] = v0;
+    output[3*xid + 1] = v1;
+    output[3*xid + 2] = v2;
+}

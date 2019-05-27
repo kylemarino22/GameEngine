@@ -15,6 +15,7 @@ import entities.Entity;
 import entities.Light;
 import models.RawModel;
 import models.TexturedModel;
+import physicsEngine.PhysicsEngine;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
 import renderEngine.MasterRenderer;
@@ -31,8 +32,10 @@ public class MainGameLoop {
 		
 		DisplayManager.createDisplay();
 		Loader loader = new Loader();
+		PhysicsEngine physEngine = new PhysicsEngine();
 
-		
+
+
 		RawModel model = OBJLoader.loadObjModel("block", loader, true);
 		ModelTexture texture = new ModelTexture(loader.loadTexture("drock079"));
 		TexturedModel texturedModel = new TexturedModel(model,texture);
@@ -50,13 +53,10 @@ public class MainGameLoop {
 		texture.setShineDamper(30);
 		texture.setReflectivity(0.2f);
 		
-		PhysicsEntity cup = new PhysicsEntity(texturedModel, new Vector3f(0,0,-25),0,0,0,1);
+		PhysicsEntity pe1 = new PhysicsEntity(texturedModel, new Vector3f(0,0,-25),0,0,25,1);
+		PhysicsEntity pe2 = new PhysicsEntity(texturedModel, new Vector3f(0,2.5f,-25),0,0,25,1);
 
-		cup.acceleration.y = 0;
-		cup.velocity.y = 0;
-		cup.velocity.x = 0;
-		cup.omega.x = 0;
-		cup.alpha.x = 0;
+		pe1.velocity.y = 100;
 
 		Light light =  new Light(new Vector3f(-10000,20000,10000), new Vector3f(1,1,1));
 		
@@ -67,7 +67,8 @@ public class MainGameLoop {
 		Camera camera = new Camera();
 		
 		MasterRenderer renderer = new MasterRenderer();
-		
+
+
 		Random random = new Random();
 		List<Entity> entities = new ArrayList<>();
 	
@@ -88,24 +89,26 @@ public class MainGameLoop {
 
 
 		long time = System.currentTimeMillis();
-		long delta_t = 0;
+		long delta_t = 170;
 		while(!Display.isCloseRequested()){
-			
-			
+
 			for(Entity entity:entities){
+				physEngine.collisionDetection((float) delta_t/1000f);
                 renderer.processEntity(entity);
             }
+
 //			cup.increasePosition(0, 0, 0.0f);
 			camera.move();
 //			cup.increaseRotation(1,0,0);
 			//game logic
 			renderer.processTerrain(terrain2);
 			renderer.processTerrain(terrain);
-			renderer.processEntity(cup);
+			renderer.processEntity(pe1);
+			renderer.processEntity(pe2);
 			renderer.render(light, camera);
 			DisplayManager.updateDisplay();
 
-			cup.calculatePhysics((float) delta_t/1000f);
+//			cup.calculatePhysics();
 
 			delta_t = System.currentTimeMillis() - time;
 			time = System.currentTimeMillis();

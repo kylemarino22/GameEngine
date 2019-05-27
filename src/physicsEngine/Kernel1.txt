@@ -1,0 +1,10 @@
+kernel void Kernel1 (global const float *a, global const float *b, global float *answer) {
+    unsigned int xid = get_global_id(0);
+    float c = a[xid] + b[xid];
+    if (c > 4) {
+            answer[xid] = c;
+    }
+    else {
+        answer[xid] = 0;
+    }
+}

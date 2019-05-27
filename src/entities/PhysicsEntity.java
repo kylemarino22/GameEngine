@@ -3,6 +3,7 @@ package entities;
 import models.TexturedModel;
 import org.lwjgl.util.vector.Vector3f;
 import physicsEngine.Physical;
+import physicsEngine.PhysicsEngine;
 
 import java.util.ArrayList;
 
@@ -19,6 +20,7 @@ public class PhysicsEntity extends Entity implements Physical {
     public PhysicsEntity(TexturedModel model, Vector3f position, float rotX, float rotY, float rotZ, float scale) {
         super(model, position, rotX, rotY, rotZ, scale);
         radius = model.getRawModel().getRadius();
+        PhysicsEngine.addPhysical(position, this);
     }
 
     public void calculatePhysics(float delta_t) {
