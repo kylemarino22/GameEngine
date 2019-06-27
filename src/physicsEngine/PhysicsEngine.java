@@ -27,6 +27,7 @@ public class PhysicsEngine {
     private final static int CHUNK_X = 20;
     private final static int CHUNK_Y = 50;
     private final static int CHUNK_Z = 20;
+    private final static float elasticity = 1;
 
     private static HashMap<Chunk, ArrayList<Physical>> physicsEntityMap = new HashMap<>();
 
@@ -72,37 +73,26 @@ public class PhysicsEngine {
                 //for E
                 for (PhysicsEntity physE: pceList ) {
 
-
-                    //TODO: Need to test if I can transform valid vertex and velocity into E space instead of E into world space
-
-                    //Transform Entity
-//                    vertexTransformer.run(physE, 1, physE.getModel().getRawModel().getVertexCount());
-//                    normalTransformer.run(physE, 2,
-//                            normalTransformer.getFaceCount(physE.getModel().getRawModel().getCl_vaoID()));
-//                    edgeNormalTransformer.run(physE, 3,
-//                            edgeNormalTransformer.getFaceCount(physE.getModel().getRawModel().getCl_vaoID())*3);
-
                     //for Verticies of O
                     vertexValidator.run(physE, transformedVertices);
-//
-//
+
                     FloatBuffer validatedVertices = vertexValidator.getOutput();
-//                    FloatBuffer transformedEdgeNormals = edgeNormalTransformer.getOutput();
                     KernelLoader.print(validatedVertices);
-//
-//                    //Check if whole array is invalid
+
+                    //Check if whole array is invalid
                     boolean noValidVertex = true;
                     for (int j = 0; j < validatedVertices.capacity()/3; j++) {
                         if (validatedVertices.get(3*j) != Float.MAX_VALUE) noValidVertex = false;
                     }
                     if (noValidVertex) break;
 
+                    //TODO: Use actual equation to do this
                     //for Velocity of O
                     Matrix4f OtransformationMatrix = Maths.createTransformationMatrix(
                             Maths.scale(currentEntity.velocity, delta_t),
-                            currentEntity.omega.x * delta_t,
-                            currentEntity.omega.y * delta_t,
-                            currentEntity.omega.z * delta_t,
+                            currentEntity.omegaVector.x * delta_t,
+                            currentEntity.omegaVector.y * delta_t,
+                            currentEntity.omegaVector.z * delta_t,
                             currentEntity.getScale());
 
                     //for transforming O-vec and O-velocity
@@ -134,6 +124,28 @@ public class PhysicsEngine {
                         FloatBuffer collisionVertices = collisionDetector.getOutput();
                         System.out.println();
                         KernelLoader.print(collisionVertices);
+
+                        for (int k = 0; k < collisionVertices.capacity(); k++) {
+                            if (collisionVertices.get(10*k) == Float.MAX_VALUE) { continue; }
+
+                            Vector3f relativeVelocity = new Vector3f(
+                                    collisionVertices.get(10*k + 4),
+                                    collisionVertices.get(10*k + 5),
+                                    collisionVertices.get(10*k + 6));
+
+                            Vector3f unitNorm = new Vector3f(
+                                    collisionVertices.get(10*k + 7),
+                                    collisionVertices.get(10*k + 8),
+                                    collisionVertices.get(10*k + 9));
+                            unitNorm = unitNorm.normalise(null);
+
+
+
+                            //evaluate collision
+                            float num = -(1 + elasticity) * Vector3f.dot(unitNorm, relativeVelocity);
+
+
+                        }
                     }
                 }
             }

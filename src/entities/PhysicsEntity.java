@@ -4,16 +4,23 @@ import models.TexturedModel;
 import org.lwjgl.util.vector.Vector3f;
 import physicsEngine.Physical;
 import physicsEngine.PhysicsEngine;
+import toolbox.Rotor3;
 
 import java.util.ArrayList;
 
 public class PhysicsEntity extends Entity implements Physical {
 
     public Vector3f acceleration = new Vector3f(0,0,0);
-    public Vector3f alpha = new Vector3f(0,0,0);
+
+    //TODO: Switch to axis angle?
+//    public Vector3f alpha = new Vector3f(0,0,0);
 
     public Vector3f velocity = new Vector3f(0,0,0);
-    public Vector3f omega = new Vector3f(0,0,0);
+    public Vector3f omegaVector = new Vector3f(0,0,0);
+
+    //TODO: Store total rotation as rotor
+    public Rotor3 totalRot = new Rotor3();
+    public Rotor3 omegaRotor = new Rotor3();
 
     public float radius;
 
@@ -36,18 +43,20 @@ public class PhysicsEntity extends Entity implements Physical {
         newPosition.y = oldPosition.y + velocity.y * delta_t;
         newPosition.z = oldPosition.z + velocity.z * delta_t;
 
-        omega.x += alpha.x * delta_t;
-        omega.y += alpha.y * delta_t;
-        omega.z += alpha.z * delta_t;
+        totalRot = totalRot.multiply(omegaRotor);
 
-        float newRotX = super.getRotX() + omega.x * delta_t;
-        float newRotY = super.getRotY() + omega.y * delta_t;
-        float newRotZ = super.getRotZ() + omega.z * delta_t;
+//        omega.x += alpha.x * delta_t;
+//        omega.y += alpha.y * delta_t;
+//        omega.z += alpha.z * delta_t;
+//
+//        float newRotX = super.getRotX() + omega.x * delta_t;
+//        float newRotY = super.getRotY() + omega.y * delta_t;
+//        float newRotZ = super.getRotZ() + omega.z * delta_t;
 
         super.setPosition(newPosition);
-        super.setRotX(newRotX);
-        super.setRotY(newRotY);
-        super.setRotZ(newRotZ);
+//        super.setRotX(newRotX);
+//        super.setRotY(newRotY);
+//        super.setRotZ(newRotZ);
     }
 
 }

@@ -3,6 +3,7 @@ package renderEngine;
 import java.util.List;
 import java.util.Map;
 
+import entities.PhysicsEntity;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -72,8 +73,19 @@ public class EntityRenderer {
 	}
 	
 	private void prepareInstance(Entity entity){
-		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(), 
-				entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+
+		Matrix4f transformationMatrix;
+		if (entity instanceof PhysicsEntity) {
+			//use rotor based transformation matrix
+			Matrix4f rotationMatrix = Maths.createRotationMatrix(((PhysicsEntity) entity).totalRot);
+			transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
+					rotationMatrix, entity.getScale());
+		}
+		else {
+			//Default transformation matrix
+			transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
+					entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+		}
 		shader.loadTransformationMatrix(transformationMatrix);
 	}
 	

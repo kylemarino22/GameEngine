@@ -8,6 +8,8 @@ import java.util.Random;
 
 import entities.PhysicsEntity;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.util.vector.Matrix3f;
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 import entities.Camera;
@@ -24,12 +26,13 @@ import renderEngine.EntityRenderer;
 import shaders.StaticShader;
 import terrains.Terrain;
 import textures.ModelTexture;
+import toolbox.Maths;
+import toolbox.Rotor3;
 
 public class MainGameLoop {
 
 	public static void main(String[] args) {
-		
-		
+
 		DisplayManager.createDisplay();
 		Loader loader = new Loader();
 		PhysicsEngine physEngine = new PhysicsEngine();
@@ -56,7 +59,7 @@ public class MainGameLoop {
 		PhysicsEntity pe1 = new PhysicsEntity(texturedModel, new Vector3f(0,0,-25),0,0,25,1);
 		PhysicsEntity pe2 = new PhysicsEntity(texturedModel, new Vector3f(0,2.5f,-25),0,0,25,1);
 
-		pe1.velocity.y = 100;
+//		pe1.velocity.y = 100;
 
 		Light light =  new Light(new Vector3f(-10000,20000,10000), new Vector3f(1,1,1));
 		
@@ -93,7 +96,7 @@ public class MainGameLoop {
 		while(!Display.isCloseRequested()){
 
 			for(Entity entity:entities){
-				physEngine.collisionDetection((float) delta_t/1000f);
+//				physEngine.collisionDetection((float) delta_t/1000f);
                 renderer.processEntity(entity);
             }
 
