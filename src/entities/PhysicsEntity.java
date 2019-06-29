@@ -2,6 +2,7 @@ package entities;
 
 import models.TexturedModel;
 import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector4f;
 import physicsEngine.Physical;
 import physicsEngine.PhysicsEngine;
 import toolbox.Rotor3;
@@ -13,12 +14,15 @@ public class PhysicsEntity extends Entity implements Physical {
     public Vector3f acceleration = new Vector3f(0,0,0);
 
     //TODO: Switch to axis angle?
-//    public Vector3f alpha = new Vector3f(0,0,0);
+
 
     public Vector3f velocity = new Vector3f(0,0,0);
-    public Vector3f omegaVector = new Vector3f(0,0,0);
 
-    //TODO: Store total rotation as rotor
+    //TODO: Store as axis angle
+    public Vector4f alphaVector = new Vector4f(0,0,0,0);
+    public Vector4f omegaVector = new Vector4f(0,0,0,1);
+
+    //Store total rotation as rotor
     public Rotor3 totalRot = new Rotor3();
     public Rotor3 omegaRotor = new Rotor3();
 
@@ -43,7 +47,9 @@ public class PhysicsEntity extends Entity implements Physical {
         newPosition.y = oldPosition.y + velocity.y * delta_t;
         newPosition.z = oldPosition.z + velocity.z * delta_t;
 
-        totalRot = totalRot.multiply(omegaRotor);
+        omegaVector.w += alphaVector.w * delta_t;
+
+//        totalRot = totalRot.multiply(omegaRotor);
 
 //        omega.x += alpha.x * delta_t;
 //        omega.y += alpha.y * delta_t;

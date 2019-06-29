@@ -20,11 +20,11 @@ public class Camera {
 		}
 		
 		if(Keyboard.isKeyDown(Keyboard.KEY_D)){
-			position.x += 0.2f;
+			position.x += 0.1f;
 		}
 		
 		if(Keyboard.isKeyDown(Keyboard.KEY_A)){
-			position.x -= 0.2f;
+			position.x -= 0.1f;
 		}
 		
 		if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)){

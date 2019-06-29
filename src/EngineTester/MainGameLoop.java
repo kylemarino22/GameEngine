@@ -56,10 +56,10 @@ public class MainGameLoop {
 		texture.setShineDamper(30);
 		texture.setReflectivity(0.2f);
 		
-		PhysicsEntity pe1 = new PhysicsEntity(texturedModel, new Vector3f(0,0,-25),0,0,25,1);
-		PhysicsEntity pe2 = new PhysicsEntity(texturedModel, new Vector3f(0,2.5f,-25),0,0,25,1);
+		PhysicsEntity pe1 = new PhysicsEntity(texturedModel, new Vector3f(0,0,-25),0,0,0,1);
+		Entity pe2 = new Entity(texturedModel, new Vector3f(0,1.99f,-25),0, 45,0,1);
 
-//		pe1.velocity.y = 100;
+		pe1.totalRot = new Rotor3(new Vector3f(0,1,0), (float)Math.PI/4);
 
 		Light light =  new Light(new Vector3f(-10000,20000,10000), new Vector3f(1,1,1));
 		

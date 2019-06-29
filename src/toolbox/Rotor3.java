@@ -29,14 +29,9 @@ public class Rotor3 {
         normalize();
     }
 
-    //Plane-Angle implementation
-    public Rotor3 (Vector3f direction, Vector3f radius, float theta ) {
-        Vector3f normRadius = radius.normalise(null);
-        Vector3f perpDirection = Vector3f.sub(direction, Maths.scale(normRadius, Vector3f.dot(direction, normRadius)), null);
+    //Plane-Angle method
 
-        Vector3f perpNormal = perpDirection.normalise(null);
-
-        Bivector3 rotPlane = outer(normRadius, perpNormal);
+    private void planeAngle (Bivector3 rotPlane, float theta ) {
         a = (float) Math.cos(theta/2.0f);
         float sina = (float) Math.sin(theta/2.0f);
 
@@ -44,6 +39,42 @@ public class Rotor3 {
         xz = -sina * rotPlane.xz;
         yz = -sina * rotPlane.yz;
         normalize();
+
+    }
+
+    //Plane-Angle Constructor
+    public Rotor3 (Bivector3 rotPlane, float theta ) {
+        planeAngle(rotPlane, theta);
+
+    }
+
+    //Radius-Vector implementation
+    public Rotor3 (Vector3f direction, Vector3f radius, float theta ) {
+        Vector3f normRadius = radius.normalise(null);
+        Vector3f perpDirection = Vector3f.sub(direction, Maths.scale(normRadius, Vector3f.dot(direction, normRadius)), null);
+
+        Vector3f perpNormal = perpDirection.normalise(null);
+
+        Bivector3 rotPlane = outer(normRadius, perpNormal);
+
+        planeAngle(rotPlane, theta);
+
+    }
+
+    //Axis-Angle Implementation - Axis must be normal
+    public Rotor3 (Vector3f axis, float theta) {
+        //find unit vector plane perpendicular to axis
+
+        //Normalized Vector not equal to axis
+        Vector3f tempVec = new Vector3f(axis.z, axis.x, axis.y);
+        Vector3f v1 = Vector3f.sub(tempVec, Maths.scale(axis, Vector3f.dot(tempVec, axis)), null).normalise(null);
+        Vector3f v2 = Vector3f.cross(axis, v1, null);
+
+        Bivector3 rotPlane = outer(v1, v2);
+
+        planeAngle(rotPlane, theta);
+
+
 
     }
 
