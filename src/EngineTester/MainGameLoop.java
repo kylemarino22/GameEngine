@@ -17,6 +17,7 @@ import entities.Entity;
 import entities.Light;
 import models.RawModel;
 import models.TexturedModel;
+import org.lwjgl.util.vector.Vector4f;
 import physicsEngine.PhysicsEngine;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
@@ -60,6 +61,7 @@ public class MainGameLoop {
 		Entity pe2 = new Entity(texturedModel, new Vector3f(0,1.99f,-25),0, 45,0,1);
 
 		pe1.totalRot = new Rotor3(new Vector3f(0,1,0), (float)Math.PI/4);
+		pe1.setOmega(new Vector4f(0,1,0, (float)Math.PI/100));
 
 		Light light =  new Light(new Vector3f(-10000,20000,10000), new Vector3f(1,1,1));
 		
@@ -112,6 +114,7 @@ public class MainGameLoop {
 			DisplayManager.updateDisplay();
 
 //			cup.calculatePhysics();
+			pe1.calculatePhysics(delta_t);
 
 			delta_t = System.currentTimeMillis() - time;
 			time = System.currentTimeMillis();

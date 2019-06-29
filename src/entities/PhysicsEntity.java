@@ -5,6 +5,7 @@ import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 import physicsEngine.Physical;
 import physicsEngine.PhysicsEngine;
+import toolbox.Maths;
 import toolbox.Rotor3;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class PhysicsEntity extends Entity implements Physical {
 
     //TODO: Store as axis angle
     public Vector4f alphaVector = new Vector4f(0,0,0,0);
-    public Vector4f omegaVector = new Vector4f(0,0,0,1);
+    public Vector4f omegaVector = new Vector4f(0,0,0,0);
 
     //Store total rotation as rotor
     public Rotor3 totalRot = new Rotor3();
@@ -47,9 +48,12 @@ public class PhysicsEntity extends Entity implements Physical {
         newPosition.y = oldPosition.y + velocity.y * delta_t;
         newPosition.z = oldPosition.z + velocity.z * delta_t;
 
-        omegaVector.w += alphaVector.w * delta_t;
-
-//        totalRot = totalRot.multiply(omegaRotor);
+        float delta_v = alphaVector.w * delta_t;
+        if (delta_v != 0) {
+            omegaVector.w += delta_v ;
+            omegaRotor = new Rotor3(Maths.to3f(omegaVector), omegaVector.w);
+        }
+        totalRot = totalRot.multiply(omegaRotor);
 
 //        omega.x += alpha.x * delta_t;
 //        omega.y += alpha.y * delta_t;
@@ -63,6 +67,12 @@ public class PhysicsEntity extends Entity implements Physical {
 //        super.setRotX(newRotX);
 //        super.setRotY(newRotY);
 //        super.setRotZ(newRotZ);
+    }
+
+    public void setOmega (Vector4f omega) {
+        omegaVector = omega;
+        omegaRotor = new Rotor3(Maths.to3f(omega), omega.w);
+
     }
 
 }
