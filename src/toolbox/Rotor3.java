@@ -99,6 +99,17 @@ public class Rotor3 {
     }
     // ---------------------------------------------------------
 
+    public Rotor3 inverse () {
+        Rotor3 invRot = new Rotor3();
+
+        invRot.a = a;
+        invRot.xy = -xy;
+        invRot.xz = -xz;
+        invRot.yz = -yz;
+
+        return invRot;
+    }
+
 
     //multiply rotors ----------------------------------------------------------
     public Rotor3 multiply (Rotor3 q) {

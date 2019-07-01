@@ -8,6 +8,7 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 import toolbox.Maths;
+import toolbox.Rotor3;
 
 import java.lang.reflect.Array;
 import java.nio.FloatBuffer;
@@ -87,40 +88,50 @@ public class PhysicsEngine {
                     if (noValidVertex) break;
 
                     //TODO: Use actual equation to do this
-                    //for Velocity of O
-                    Matrix4f OtransformationMatrix = Maths.createTransformationMatrix(
-                            Maths.scale(currentEntity.velocity, delta_t),
-                            currentEntity.omegaVector.x * delta_t,
-                            currentEntity.omegaVector.y * delta_t,
-                            currentEntity.omegaVector.z * delta_t,
-                            currentEntity.getScale());
 
-                    //for transforming O-vec and O-velocity
-                    Matrix4f EtransformationMatrix = Maths.createTransformationMatrix(physE.getPosition(),
-                            physE.getRotX(), physE.getRotY(), physE.getRotZ(), physE.getScale());
-                    EtransformationMatrix = Matrix4f.invert(EtransformationMatrix, null);
+                    Vector3f EBasis_axis = Maths.scale(Maths.to3f(physE.omegaVector), physE.omegaVector.w);
+                    EBasis_axis = physE.totalRot.rotate(EBasis_axis);
+
 
                     //for valid vertex of O
                     for (int j = 0; j < validatedVertices.capacity()/3; j++) {
                         if (validatedVertices.get(3*j) == Float.MAX_VALUE) { continue; }
 
                         //Create velocity vector
-                        Vector4f vec = new Vector4f(
+                        //TODO: Subtract O pos from this
+                        Vector3f WBasis_point = new Vector3f(
                                 validatedVertices.get(3*j),
                                 validatedVertices.get(3*j+1),
-                                validatedVertices.get(3*j+2), 1);
-                        Vector4f newPos = Matrix4f.transform(OtransformationMatrix, vec, null);
+                                validatedVertices.get(3*j+2));
+                        Vector3f OBasis_point = Vector3f.sub(WBasis_point, currentEntity.getPosition(), null);
+                        Vector3f axis = Maths.scale(Maths.to3f(currentEntity.omegaVector), currentEntity.omegaVector.w);
+                        Vector3f velocityVec3f = Vector3f.cross(axis, OBasis_point, null);
+                        velocityVec3f = Vector3f.add(currentEntity.velocity, velocityVec3f, null);
 
-                        Vector4f velocity = new Vector4f(newPos.x-vec.x, newPos.y-vec.y, newPos.z-vec.z, 0);
-                        velocity = Maths.scale(velocity, 1/delta_t);
+                        //TODO: Subtract E pos from O vertex total pos
+
+                        Vector3f EBasis_point = Vector3f.sub(WBasis_point, physE.getPosition(), null);
+                        Vector3f EBasis_rotVel = Vector3f.cross(EBasis_axis, EBasis_point, null);
 
                         //transform into E-space
+                        velocityVec3f = Vector3f.sub(velocityVec3f, physE.velocity, null);
+                        velocityVec3f = Vector3f.sub(velocityVec3f, EBasis_rotVel, null);
 
-                        vec = Matrix4f.transform(EtransformationMatrix, vec, null);
-                        velocity = Matrix4f.transform(EtransformationMatrix, velocity, null);
+                        /*
+                        =============================== Old Velocity Calculation ====================================
+                        axis = Maths.scale(Maths.to3f(physE.omegaVector), physE.omegaVector.w);
+                        Vector3f rotEVelocity = phys
+
+                        Vector4f velocityVec4f = new Vector4f(velocityVec3f.x, velocityVec3f.y, velocityVec3f.z, 1);
+                        Vector4f point4f = new Vector4f(point.x, point.y, point.z, 1);
+
+                        point4f = Matrix4f.transform(EtransformationMatrix, point4f, null);
+                        velocityVec4f = Matrix4f.transform(EtransformationMatrix, velocityVec4f, null);
+                        =============================================================================================
+                        */
 
                         //Run collision detector
-                        collisionDetector.run(delta_t, Maths.to3f(vec), Maths.to3f(velocity), physE);
+                        collisionDetector.run(delta_t, EBasis_point, velocityVec3f, physE);
                         FloatBuffer collisionVertices = collisionDetector.getOutput();
                         System.out.println();
                         KernelLoader.print(collisionVertices);

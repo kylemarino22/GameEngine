@@ -2,11 +2,14 @@ package EngineTester;
 
 
 
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import entities.PhysicsEntity;
+import org.lwjgl.Sys;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Matrix4f;
@@ -58,10 +61,11 @@ public class MainGameLoop {
 		texture.setReflectivity(0.2f);
 		
 		PhysicsEntity pe1 = new PhysicsEntity(texturedModel, new Vector3f(0,0,-25),0,0,0,1);
-		Entity pe2 = new Entity(texturedModel, new Vector3f(0,1.99f,-25),0, 45,0,1);
+		PhysicsEntity pe2 = new PhysicsEntity(texturedModel, new Vector3f(0,3f,-25),0, 0,0,1);
 
-		pe1.totalRot = new Rotor3(new Vector3f(0,1,0), (float)Math.PI/4);
-		pe1.setOmega(new Vector4f(0,1,0, (float)Math.PI/100));
+//		pe1.totalRot = new Rotor3(new Vector3f(0,1,0), (float)Math.PI/4);
+		pe1.totalRot = new Rotor3(new Vector3f(0.707f,0.707f,0),  (float)Math.PI/4);
+		pe1.velocity.y = 0.001f;
 
 		Light light =  new Light(new Vector3f(-10000,20000,10000), new Vector3f(1,1,1));
 		
@@ -95,10 +99,12 @@ public class MainGameLoop {
 
 		long time = System.currentTimeMillis();
 		long delta_t = 170;
+
+		boolean released = false;
+
 		while(!Display.isCloseRequested()){
 
 			for(Entity entity:entities){
-//				physEngine.collisionDetection((float) delta_t/1000f);
                 renderer.processEntity(entity);
             }
 
@@ -114,10 +120,57 @@ public class MainGameLoop {
 			DisplayManager.updateDisplay();
 
 //			cup.calculatePhysics();
-			pe1.calculatePhysics(delta_t);
 
-			delta_t = System.currentTimeMillis() - time;
-			time = System.currentTimeMillis();
+			Keyboard.next();
+
+			if (Keyboard.getEventCharacter() == 'f') {
+				System.out.println("Pressf");
+
+				if (Keyboard.getEventKeyState()) {
+					//pressed
+					if(released) {
+						physEngine.collisionDetection((float) delta_t/1000f);
+						pe1.calculatePhysics(delta_t);
+
+					}
+
+//					System.out.println("pressed");
+					released = false;
+				}
+				else {
+					//released
+
+//					System.out.println("released");
+					released = true;
+				}
+
+			}
+
+
+//			Keyboard.next();
+//
+//				if (Keyboard.isKeyDown(Keyboard.KEY_F)) {
+////					System.out.println("Pressed");
+//					Keyboard.next();
+//
+//					System.out.println("State: " + Keyboard.getEventKeyState());
+//					if (Keyboard.getEventKeyState()) {
+//						System.out.println("Released: " + Keyboard.getEventCharacter());
+//
+////						if (Keyboard.getEventCharacter() == 'f') {
+////
+////						}
+//					}
+//				}
+//			}
+//			System.out.println("repeat " + Keyboard.isRepeatEvent());
+
+//			if(Keyboard.getEventKey() Keyboard.getEventKeyState()){
+//
+//			}
+
+//			delta_t = System.currentTimeMillis() - time;
+//			time = System.currentTimeMillis();
 
 			
 		}
