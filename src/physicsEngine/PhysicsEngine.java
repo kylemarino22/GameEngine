@@ -69,7 +69,7 @@ public class PhysicsEngine {
                         currentEntity.getModel().getRawModel().getVertexCount());
 
                 FloatBuffer transformedVertices = vertexTransformer.getOutput();
-                KernelLoader.print(transformedVertices);
+//                KernelLoader.print(transformedVertices);
 
                 //for E
                 for (PhysicsEntity physE: pceList ) {
@@ -78,7 +78,10 @@ public class PhysicsEngine {
                     vertexValidator.run(physE, transformedVertices);
 
                     FloatBuffer validatedVertices = vertexValidator.getOutput();
+                    System.out.println("============================ VALID VERTICES ============================");
                     KernelLoader.print(validatedVertices);
+                    System.out.println("========================================================================");
+
 
                     //Check if whole array is invalid
                     boolean noValidVertex = true;
@@ -90,15 +93,22 @@ public class PhysicsEngine {
                     //TODO: Use actual equation to do this
 
                     Vector3f EBasis_axis = Maths.scale(Maths.to3f(physE.omegaVector), physE.omegaVector.w);
+                    Vector3f EBasis_OCenter = Vector3f.sub(currentEntity.getPosition(), physE.getPosition(), null);
+                    EBasis_OCenter = physE.totalRot.rotate(EBasis_OCenter);
                     EBasis_axis = physE.totalRot.rotate(EBasis_axis);
 
+                    Vector3f collisionVector = new Vector3f(0,0,0);
+                    Vector3f collisionVertex = new Vector3f(0,0,0);
+                    Vector3f collisionVelocity = new Vector3f(0,0,0);
+
+                    int cnumSum = 0;
 
                     //for valid vertex of O
                     for (int j = 0; j < validatedVertices.capacity()/3; j++) {
                         if (validatedVertices.get(3*j) == Float.MAX_VALUE) { continue; }
 
+                        //TODO: Could Be optimized by moving validated vertex transformations to a gpu kernel
                         //Create velocity vector
-                        //TODO: Subtract O pos from this
                         Vector3f WBasis_point = new Vector3f(
                                 validatedVertices.get(3*j),
                                 validatedVertices.get(3*j+1),
@@ -108,12 +118,11 @@ public class PhysicsEngine {
                         Vector3f velocityVec3f = Vector3f.cross(axis, OBasis_point, null);
                         velocityVec3f = Vector3f.add(currentEntity.velocity, velocityVec3f, null);
 
-                        //TODO: Subtract E pos from O vertex total pos
+                        //transform into E-space
 
                         Vector3f EBasis_point = Vector3f.sub(WBasis_point, physE.getPosition(), null);
                         Vector3f EBasis_rotVel = Vector3f.cross(EBasis_axis, EBasis_point, null);
 
-                        //transform into E-space
                         velocityVec3f = Vector3f.sub(velocityVec3f, physE.velocity, null);
                         velocityVec3f = Vector3f.sub(velocityVec3f, EBasis_rotVel, null);
 
@@ -131,33 +140,90 @@ public class PhysicsEngine {
                         */
 
                         //Run collision detector
+
+                        //TODO: Clean up collisionDetctor kernel (Easy)
                         collisionDetector.run(delta_t, EBasis_point, velocityVec3f, physE);
                         FloatBuffer collisionVertices = collisionDetector.getOutput();
                         System.out.println();
                         KernelLoader.print(collisionVertices);
 
-                        for (int k = 0; k < collisionVertices.capacity(); k++) {
+                        Vector3f unitNorm = new Vector3f(0,0,0);
+                        Vector3f c_location = new Vector3f(0,0,0);
+                        int numSum = 0;
+
+                        for (int k = 0; k < collisionVertices.capacity()/10; k++) {
                             if (collisionVertices.get(10*k) == Float.MAX_VALUE) { continue; }
 
-                            Vector3f relativeVelocity = new Vector3f(
-                                    collisionVertices.get(10*k + 4),
-                                    collisionVertices.get(10*k + 5),
-                                    collisionVertices.get(10*k + 6));
-
-                            Vector3f unitNorm = new Vector3f(
+                            unitNorm = Vector3f.add(unitNorm, new Vector3f(
                                     collisionVertices.get(10*k + 7),
                                     collisionVertices.get(10*k + 8),
-                                    collisionVertices.get(10*k + 9));
-                            unitNorm = unitNorm.normalise(null);
+                                    collisionVertices.get(10*k + 9)), null);
 
+                            c_location = Vector3f.add(c_location, new Vector3f(
+                                    collisionVertices.get(10*k + 1),
+                                    collisionVertices.get(10*k + 2),
+                                    collisionVertices.get(10*k + 3)), null);
 
-
-                            //evaluate collision
-                            float num = -(1 + elasticity) * Vector3f.dot(unitNorm, relativeVelocity);
+                            numSum++;
 
 
                         }
+
+                        if (numSum == 0) {
+                            break;
+                        }
+                        else if (numSum > 1) {
+                            unitNorm = Maths.scale(unitNorm, (float)1/numSum);
+                            c_location = Maths.scale(c_location, (float)1/numSum);
+                        }
+
+                        collisionVector = Vector3f.add(collisionVector, unitNorm, null);
+                        collisionVertex = Vector3f.add(collisionVertex, c_location, null);
+                        collisionVelocity = Vector3f.add(collisionVelocity, velocityVec3f, null);
+
+
+                        cnumSum ++;
                     }
+
+                    if (cnumSum == 0) {
+                        break;
+                    }
+                    else if (cnumSum > 1) {
+                        collisionVector = Maths.scale(collisionVector, (float)1/cnumSum);
+                        collisionVertex = Maths.scale(collisionVertex, (float)1/cnumSum);
+                        collisionVelocity = Maths.scale(collisionVelocity, (float)1/cnumSum);
+                    }
+
+                    Vector3f WBasis_Norm = physE.totalRot.rotate(collisionVector);
+//                    Vector3f ERot_Norm = physE.totalRot.inverse().rotate(collisionVector);
+//                            Vector3f WBasis_c = physE.totalRot.rotate(c_location);
+
+                    Vector3f OBasis_collsionVertex = Vector3f.sub(EBasis_OCenter, collisionVertex, null);
+
+                    //evaluate collision impulse
+                    float num = -(1 + elasticity) * Vector3f.dot(collisionVelocity, collisionVector);
+
+                    float den = 1/currentEntity.mass + 1/physE.mass
+                            + Vector3f.cross(collisionVertex, collisionVector, null).lengthSquared()/physE.InertiaTensor
+                            + Vector3f.cross(OBasis_collsionVertex, collisionVector, null).lengthSquared()/currentEntity.InertiaTensor;
+
+                    float a = Vector3f.cross(collisionVertex, collisionVector, null).lengthSquared()/physE.InertiaTensor;
+                    float b = Vector3f.cross(OBasis_collsionVertex, collisionVector, null).lengthSquared()/currentEntity.InertiaTensor;
+
+
+                    float jimpulse = num/den;
+
+
+                    currentEntity.velocity = Vector3f.add(currentEntity.velocity, Maths.scale(WBasis_Norm, jimpulse/currentEntity.mass), null);
+                    physE.velocity =  Vector3f.sub(physE.velocity ,Maths.scale(WBasis_Norm, jimpulse/physE.mass), null );
+//                            currentEntity.velocity +=
+
+
+
+
+
+
+
                 }
             }
         }

@@ -7,35 +7,35 @@ kernel void collisionDetector (__constant float *uniforms, global const unsigned
     unsigned int index2 = indices[xid*3 + 2]*3;
 
     #Get centroid for face velocity
-    float v[3];
-    v[0] = (positions[index0] + positions[index1] + positions[index2]) /3;
-    v[1] = (positions[index0 + 1] + positions[index1 + 1] + positions[index2 + 2]) /3;
-    v[2] = (positions[index0 + 2] + positions[index1 + 1] + positions[index2 + 2]) /3;
+    #float v[3];
+    #v[0] = (positions[index0] + positions[index1] + positions[index2]) /3;
+    #v[1] = (positions[index0 + 1] + positions[index1 + 1] + positions[index2 + 2]) /3;
+    #v[2] = (positions[index0 + 2] + positions[index1 + 1] + positions[index2 + 2]) /3;
 
 
-    float v0 = uniforms[19];
-    float v1 = uniforms[20];
-    float v2 = uniforms[21];
-    for (unsigned int i = 0; i < 3; i++) {
+    #float v0 = uniforms[19];
+    #float v1 = uniforms[20];
+    #float v2 = uniforms[21];
+    #for (unsigned int i = 0; i < 3; i++) {
 
-        v0 += uniforms[4*i+7] * v[i];
-        v1 += uniforms[4*i + 8] * v[i];
-        v2 += uniforms[4*i + 9] * v[i];
-    }
+    #    v0 += uniforms[4*i+7] * v[i];
+    #    v1 += uniforms[4*i + 8] * v[i];
+    #    v2 += uniforms[4*i + 9] * v[i];
+    #}
 
-    v0 = uniforms[4] - (v0 - v[0])/uniforms[0];
-    v1 = uniforms[5] - (v1 - v[1])/uniforms[0];
-    v2 = uniforms[6] - (v2 - v[2])/uniforms[0];
+    #v0 = uniforms[4] - (v0 - v[0])/uniforms[0];
+    #v1 = uniforms[5] - (v1 - v[1])/uniforms[0];
+    #v2 = uniforms[6] - (v2 - v[2])/uniforms[0];
 
-    output[xid*10 + 4] = v0;
-    output[xid*10 + 5] = v1;
-    output[xid*10 + 6] = v2;
+    output[xid*10 + 4] = uniforms[4];
+    output[xid*10 + 5] = uniforms[5];
+    output[xid*10 + 6] = uniforms[6];
     output[xid*10 + 7] = normals[3*xid];
     output[xid*10 + 8] = normals[3*xid + 1];
     output[xid*10 + 9] = normals[3*xid + 2];
 
     #Check if normal faces velocity vector, invert normal vector
-    float den = normals[3*xid] * v0 + normals[3*xid + 1] * v1 + normals[3*xid + 2] * v2;
+    float den = normals[3*xid] * uniforms[4] + normals[3*xid + 1] * uniforms[5] + normals[3*xid + 2] * uniforms[6];
     if (den >= 0) {
         output[xid*10] = FLT_MAX;
         return;
@@ -48,10 +48,12 @@ kernel void collisionDetector (__constant float *uniforms, global const unsigned
     float num = normals[3*xid] * p0 + normals[3*xid + 1] * p1 + normals[3*xid + 2] * p2;
 
     #if normal faces point
-    if (num < 0) {
+
+    if (num < -0.025) {
         output[xid*10] = FLT_MAX;
         return;
     }
+
 
     #calculate t
 

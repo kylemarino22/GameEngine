@@ -25,8 +25,7 @@ public class VectorTransformProgram extends KernelVBOProgram{
 
     public void run(PhysicsEntity physE, int vaoIndex, int size) {
 
-        Matrix4f transformationMatrix = Maths.createTransformationMatrix(physE.getPosition(),
-                physE.getRotX(), physE.getRotY(), physE.getRotZ(), physE.getScale());
+        Matrix4f transformationMatrix = Maths.matrixFromEntity(physE);
         uniformLoader.loadUniform(0, transformationMatrix);
         enqueueUniforms();
         int vaoID = physE.getModel().getRawModel().getCl_vaoID();

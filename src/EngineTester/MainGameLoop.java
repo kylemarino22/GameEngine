@@ -43,7 +43,7 @@ public class MainGameLoop {
 
 
 
-		RawModel model = OBJLoader.loadObjModel("block", loader, true);
+		RawModel model = OBJLoader.loadObjModel("cube", loader, true);
 		ModelTexture texture = new ModelTexture(loader.loadTexture("drock079"));
 		TexturedModel texturedModel = new TexturedModel(model,texture);
 //		texturedModel.getTexture().setUseFakeLighting(true);
@@ -64,8 +64,8 @@ public class MainGameLoop {
 		PhysicsEntity pe2 = new PhysicsEntity(texturedModel, new Vector3f(0,3f,-25),0, 0,0,1);
 
 //		pe1.totalRot = new Rotor3(new Vector3f(0,1,0), (float)Math.PI/4);
-		pe1.totalRot = new Rotor3(new Vector3f(0.707f,0.707f,0),  (float)Math.PI/4);
-		pe1.velocity.y = 0.001f;
+//		pe1.totalRot = new Rotor3(new Vector3f(0.707f,0.707f,0),  (float)Math.PI/4);
+		pe1.velocity.y = 1f;
 
 		Light light =  new Light(new Vector3f(-10000,20000,10000), new Vector3f(1,1,1));
 		
@@ -120,6 +120,9 @@ public class MainGameLoop {
 			DisplayManager.updateDisplay();
 
 //			cup.calculatePhysics();
+//			physEngine.collisionDetection((float) delta_t/1000f);
+//			pe1.calculatePhysics(delta_t/1000f);
+//			pe2.calculatePhysics(delta_t/1000f);
 
 			Keyboard.next();
 
@@ -130,7 +133,8 @@ public class MainGameLoop {
 					//pressed
 					if(released) {
 						physEngine.collisionDetection((float) delta_t/1000f);
-						pe1.calculatePhysics(delta_t);
+						pe1.calculatePhysics(delta_t/1000f);
+						pe2.calculatePhysics(delta_t/1000f);
 
 					}
 

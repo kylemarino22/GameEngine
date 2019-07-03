@@ -1,5 +1,7 @@
 package toolbox;
 
+import entities.Entity;
+import entities.PhysicsEntity;
 import org.lwjgl.util.vector.*;
 
 import entities.Camera;
@@ -25,6 +27,22 @@ public class Maths {
 		translate(translation, rotationMatrix);
 		Matrix4f.scale(new Vector3f(scale,scale,scale), rotationMatrix, rotationMatrix);
 		return rotationMatrix;
+	}
+
+	public static Matrix4f matrixFromEntity (Entity entity) {
+		Matrix4f transformationMatrix;
+		if (entity instanceof PhysicsEntity) {
+			//use rotor based transformation matrix
+			Matrix4f rotationMatrix = Maths.createRotationMatrix(((PhysicsEntity) entity).totalRot);
+			transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
+					rotationMatrix, entity.getScale());
+		}
+		else {
+			//Default transformation matrix
+			transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
+					entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+		}
+		return transformationMatrix;
 	}
 
 	public static Matrix4f createRotationMatrix (Rotor3 rotor) {
@@ -83,7 +101,7 @@ public class Maths {
 		return new Vector3f(
 				a.x *b,
 				a.y *b,
-				a.z*b);
+				a.z *b);
 	}
 
 	public static Vector4f scale(Vector4f a, float b) {

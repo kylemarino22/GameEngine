@@ -26,7 +26,7 @@ public class VertexValidatorProgram  extends KernelVBOProgram {
     public void run(Entity e, FloatBuffer vertices) {
         float rad = e.getModel().getRawModel().getRadius();
         float scale = e.getScale();
-        uniformLoader.loadUniform(0, rad*rad*scale*scale);
+        uniformLoader.loadUniform(0, rad*rad*scale*scale * 1.1f);
         uniformLoader.loadUniform(1, e.getPosition());
         enqueueUniforms();
         loadMemory(1, vertices);

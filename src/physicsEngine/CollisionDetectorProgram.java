@@ -33,13 +33,13 @@ public class CollisionDetectorProgram extends KernelVBOProgram{
         uniformLoader.loadUniform(1, vec);
         uniformLoader.loadUniform(2, velocity);
 
-        Matrix4f transformationMatrix = Maths.createTransformationMatrix(
-                Maths.scale(E.velocity, delta_t),
-                E.omegaVector.x * delta_t,
-                E.omegaVector.y * delta_t,
-                E.omegaVector.z * delta_t,
-                E.getScale());
-        uniformLoader.loadUniform(3, transformationMatrix);
+//        Matrix4f transformationMatrix = Maths.createTransformationMatrix(
+//                Maths.scale(E.velocity, delta_t),
+//                E.omegaVector.x * delta_t,
+//                E.omegaVector.y * delta_t,
+//                E.omegaVector.z * delta_t,
+//                E.getScale());
+//        uniformLoader.loadUniform(3, transformationMatrix);
 
 
         enqueueUniforms();

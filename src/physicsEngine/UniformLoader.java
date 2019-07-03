@@ -66,7 +66,7 @@ public class UniformLoader {
                 uniformFloats.put(genUniform((Float) uniform.fst));
             }
         }
-        KernelLoader.print(uniformFloats);
+//        KernelLoader.print(uniformFloats);
         uniformFloats.flip();
         return uniformFloats;
     }

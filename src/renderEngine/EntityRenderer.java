@@ -74,18 +74,7 @@ public class EntityRenderer {
 	
 	private void prepareInstance(Entity entity){
 
-		Matrix4f transformationMatrix;
-		if (entity instanceof PhysicsEntity) {
-			//use rotor based transformation matrix
-			Matrix4f rotationMatrix = Maths.createRotationMatrix(((PhysicsEntity) entity).totalRot);
-			transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
-					rotationMatrix, entity.getScale());
-		}
-		else {
-			//Default transformation matrix
-			transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
-					entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
-		}
+		Matrix4f transformationMatrix = Maths.matrixFromEntity(entity);
 		shader.loadTransformationMatrix(transformationMatrix);
 	}
 	
