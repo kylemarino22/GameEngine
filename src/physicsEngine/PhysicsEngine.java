@@ -78,9 +78,9 @@ public class PhysicsEngine {
                     vertexValidator.run(physE, transformedVertices);
 
                     FloatBuffer validatedVertices = vertexValidator.getOutput();
-                    System.out.println("============================ VALID VERTICES ============================");
-                    KernelLoader.print(validatedVertices);
-                    System.out.println("========================================================================");
+//                    System.out.println("============================ VALID VERTICES ============================");
+//                    KernelLoader.print(validatedVertices);
+//                    System.out.println("========================================================================");
 
 
                     //Check if whole array is invalid
@@ -144,8 +144,8 @@ public class PhysicsEngine {
                         //TODO: Clean up collisionDetctor kernel (Easy)
                         collisionDetector.run(delta_t, EBasis_point, velocityVec3f, physE);
                         FloatBuffer collisionVertices = collisionDetector.getOutput();
-                        System.out.println();
-                        KernelLoader.print(collisionVertices);
+//                        System.out.println();
+//                        KernelLoader.print(collisionVertices);
 
                         Vector3f unitNorm = new Vector3f(0,0,0);
                         Vector3f c_location = new Vector3f(0,0,0);

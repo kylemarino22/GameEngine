@@ -6,6 +6,7 @@ import org.lwjgl.opencl.CLMem;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.lwjgl.opencl.CL10.*;
 
@@ -37,6 +38,18 @@ public class KernelVBOProgram extends KernelProgram{
 
     public static int createVAO(float[] positions, float[] normals, int[] indices, float[] edgeNormals) {
 
+        ArrayList<Float> validPositions = new ArrayList<>();
+        for (float i : positions) {
+            validPositions.add(i);
+        }
+
+        indices = preProcessVertices(validPositions, indices);
+
+        positions = new float[validPositions.size()];
+        for (int i = 0; i < positions.length; i++) {
+            positions[i] = validPositions.get(i);
+        }
+
         for (KernelVBOProgram k :kernelList) {
             cl_vbo objToLoad = new cl_vbo(k, indices.length/3);
             objToLoad.storeDataInAttributeList(0, indices);
@@ -46,6 +59,38 @@ public class KernelVBOProgram extends KernelProgram{
             k.vbos.add(objToLoad);
         }
         return kernelList.get(0).vbos.size() - 1;
+    }
+
+    private static int[] preProcessVertices (ArrayList<Float> validPositions, int[] indices) {
+
+        //Remove duplicate vertices
+
+
+        for (int i = 0; i < validPositions.size()/3 - 1; i++) {
+            for (int j = i + 1; j <validPositions.size()/3; j++) {
+
+                if(validPositions.get(i*3).equals(validPositions.get(j*3))
+                        && validPositions.get(i*3 + 1).equals(validPositions.get(j*3 + 1))
+                        && validPositions.get(i*3 + 2).equals(validPositions.get(j*3 + 2))) {
+                    //Vertex is a duplicate
+                    validPositions.remove(j*3);
+                    validPositions.remove(j*3);
+                    validPositions.remove(j*3);
+
+                    for (int k = 0; k < indices.length; k++) {
+                        if (indices[k] == j) {
+                            indices[k] = i;
+                        }
+                    }
+
+                    j--;
+
+                }
+            }
+        }
+
+        return indices;
+
     }
 
     public static class cl_vbo {

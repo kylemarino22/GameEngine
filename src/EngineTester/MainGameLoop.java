@@ -60,7 +60,7 @@ public class MainGameLoop {
 		texture.setShineDamper(30);
 		texture.setReflectivity(0.2f);
 		
-		PhysicsEntity pe1 = new PhysicsEntity(texturedModel, new Vector3f(0,0,-25),0,0,0,1);
+		PhysicsEntity pe1 = new PhysicsEntity(texturedModel, new Vector3f(0,-30f,-25),0,0,0,1);
 		PhysicsEntity pe2 = new PhysicsEntity(texturedModel, new Vector3f(0,3f,-25),0, 0,0,1);
 
 //		pe1.totalRot = new Rotor3(new Vector3f(0,1,0), (float)Math.PI/4);
@@ -120,35 +120,35 @@ public class MainGameLoop {
 			DisplayManager.updateDisplay();
 
 //			cup.calculatePhysics();
-//			physEngine.collisionDetection((float) delta_t/1000f);
-//			pe1.calculatePhysics(delta_t/1000f);
-//			pe2.calculatePhysics(delta_t/1000f);
+			physEngine.collisionDetection((float) delta_t/1000f);
+			pe1.calculatePhysics(delta_t/1000f);
+			pe2.calculatePhysics(delta_t/1000f);
 
-			Keyboard.next();
-
-			if (Keyboard.getEventCharacter() == 'f') {
-				System.out.println("Pressf");
-
-				if (Keyboard.getEventKeyState()) {
-					//pressed
-					if(released) {
-						physEngine.collisionDetection((float) delta_t/1000f);
-						pe1.calculatePhysics(delta_t/1000f);
-						pe2.calculatePhysics(delta_t/1000f);
-
-					}
-
-//					System.out.println("pressed");
-					released = false;
-				}
-				else {
-					//released
-
-//					System.out.println("released");
-					released = true;
-				}
-
-			}
+//			Keyboard.next();
+//
+//			if (Keyboard.getEventCharacter() == 'f') {
+//				System.out.println("Pressf");
+//
+//				if (Keyboard.getEventKeyState()) {
+//					//pressed
+//					if(released) {
+//						physEngine.collisionDetection((float) delta_t/1000f);
+//						pe1.calculatePhysics(delta_t/1000f);
+//						pe2.calculatePhysics(delta_t/1000f);
+//
+//					}
+//
+////					System.out.println("pressed");
+//					released = false;
+//				}
+//				else {
+//					//released
+//
+////					System.out.println("released");
+//					released = true;
+//				}
+//
+//			}
 
 
 //			Keyboard.next();
