@@ -21,6 +21,7 @@ import entities.Light;
 import models.RawModel;
 import models.TexturedModel;
 import org.lwjgl.util.vector.Vector4f;
+import physicsEngine.KernelLoader;
 import physicsEngine.PhysicsEngine;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
@@ -36,6 +37,14 @@ import toolbox.Rotor3;
 public class MainGameLoop {
 
 	public static void main(String[] args) {
+
+		final boolean step_physics = false;
+
+		final int skipSteps = 0;
+
+		if (step_physics) {
+			KernelLoader.debug = true;
+		}
 
 		DisplayManager.createDisplay();
 		Loader loader = new Loader();
@@ -60,12 +69,22 @@ public class MainGameLoop {
 		texture.setShineDamper(30);
 		texture.setReflectivity(0.2f);
 		
-		PhysicsEntity pe1 = new PhysicsEntity(texturedModel, new Vector3f(0,-30f,-25),0,0,0,1);
+		PhysicsEntity pe1 = new PhysicsEntity(texturedModel, new Vector3f(0f,-3f,-25),0,0,0,1);
 		PhysicsEntity pe2 = new PhysicsEntity(texturedModel, new Vector3f(0,3f,-25),0, 0,0,1);
 
-//		pe1.totalRot = new Rotor3(new Vector3f(0,1,0), (float)Math.PI/4);
-//		pe1.totalRot = new Rotor3(new Vector3f(0.707f,0.707f,0),  (float)Math.PI/4);
-		pe1.velocity.y = 1f;
+		pe1.totalRot = new Rotor3(new Vector3f(0,0,1), (float)Math.PI/4);
+
+		pe2.totalRot = new Rotor3(new Vector3f(0,0,1), (float)Math.PI/3);
+
+//		pe1.totalRot = pe1.totalRot.multiply(new Rotor3(new Vector3f(1,0,0), (float)Math.PI/3));
+
+//		pe1.acceleration.y = 0.1f;
+//		pe2.acceleration.y = 0.05f;
+
+		pe1.velocity.y = 0.5f;
+
+		pe2.velocity.y = -0.5f;
+
 
 		Light light =  new Light(new Vector3f(-10000,20000,10000), new Vector3f(1,1,1));
 		
@@ -81,24 +100,27 @@ public class MainGameLoop {
 		Random random = new Random();
 		List<Entity> entities = new ArrayList<>();
 	
-		for (int i = 0; i < 200; i++) {
-			entities.add(new Entity(tree, new Vector3f(random.nextFloat() * 800 - 400, 0,
-					random.nextFloat() * -600), 0,0,0,3));
-			entities.add(new Entity(grass, new Vector3f(random.nextFloat() * 800 - 400, 0,
-					random.nextFloat() * -600), 0,0,0,1));
-			entities.add(new Entity(fern, new Vector3f(random.nextFloat() * 800 - 400, 0,
-					random.nextFloat() * -600), 0,0,0, 0.25f));
-		}
+//		for (int i = 0; i < 200; i++) {
+//			entities.add(new Entity(tree, new Vector3f(random.nextFloat() * 800 - 400, 0,
+//					random.nextFloat() * -600), 0,0,0,3));
+//			entities.add(new Entity(grass, new Vector3f(random.nextFloat() * 800 - 400, 0,
+//					random.nextFloat() * -600), 0,0,0,1));
+//			entities.add(new Entity(fern, new Vector3f(random.nextFloat() * 800 - 400, 0,
+//					random.nextFloat() * -600), 0,0,0, 0.25f));
+//		}
 
-		for (int i = 0; i < 100; i++) {
-			for (int j = 0; j < 100; j++) {
-				entities.add(new Entity(texturedModel, new Vector3f(i* 20, 0, -j*20), 0, 0, 0,0.5f));
-			}
-		}
+//		for (int i = 0; i < 100; i++) {
+//			for (int j = 0; j < 100; j++) {
+//				entities.add(new Entity(texturedModel, new Vector3f(i* 20, 0, -j*20), 0, 0, 0,0.5f));
+//			}
+//		}
 
 
 		long time = System.currentTimeMillis();
 		long delta_t = 170;
+
+		int delay = 0;
+		int skipCounter = 0;
 
 		boolean released = false;
 
@@ -108,10 +130,7 @@ public class MainGameLoop {
                 renderer.processEntity(entity);
             }
 
-//			cup.increasePosition(0, 0, 0.0f);
 			camera.move();
-//			cup.increaseRotation(1,0,0);
-			//game logic
 			renderer.processTerrain(terrain2);
 			renderer.processTerrain(terrain);
 			renderer.processEntity(pe1);
@@ -119,68 +138,64 @@ public class MainGameLoop {
 			renderer.render(light, camera);
 			DisplayManager.updateDisplay();
 
-//			cup.calculatePhysics();
-			physEngine.collisionDetection((float) delta_t/1000f);
-			pe1.calculatePhysics(delta_t/1000f);
-			pe2.calculatePhysics(delta_t/1000f);
+			if (delay < 20) {
+				delay++;
+				continue;
+			}
 
-//			Keyboard.next();
-//
-//			if (Keyboard.getEventCharacter() == 'f') {
-//				System.out.println("Pressf");
-//
-//				if (Keyboard.getEventKeyState()) {
-//					//pressed
-//					if(released) {
-//						physEngine.collisionDetection((float) delta_t/1000f);
-//						pe1.calculatePhysics(delta_t/1000f);
-//						pe2.calculatePhysics(delta_t/1000f);
-//
-//					}
-//
-////					System.out.println("pressed");
-//					released = false;
-//				}
-//				else {
-//					//released
-//
-////					System.out.println("released");
-//					released = true;
-//				}
-//
-//			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_R)) {
+				//reset
+				pe1.setPosition(new Vector3f(0f,-3f,-25));
+				pe2.setPosition(new Vector3f(0,3f,-25));
 
+				pe1.velocity = new Vector3f(0,0.5f,0);
+				pe2.velocity = new Vector3f(0,-0.5f,0);
 
-//			Keyboard.next();
-//
-//				if (Keyboard.isKeyDown(Keyboard.KEY_F)) {
-////					System.out.println("Pressed");
-//					Keyboard.next();
-//
-//					System.out.println("State: " + Keyboard.getEventKeyState());
-//					if (Keyboard.getEventKeyState()) {
-//						System.out.println("Released: " + Keyboard.getEventCharacter());
-//
-////						if (Keyboard.getEventCharacter() == 'f') {
-////
-////						}
-//					}
-//				}
-//			}
-//			System.out.println("repeat " + Keyboard.isRepeatEvent());
+				pe1.omegaRotor = new Rotor3();
+				pe2.omegaRotor = new Rotor3();
 
-//			if(Keyboard.getEventKey() Keyboard.getEventKeyState()){
-//
-//			}
+				pe1.totalRot = new Rotor3(new Vector3f(0,0,1), (float)Math.PI/4);
+				pe2.totalRot = new Rotor3(new Vector3f(0,0,1), (float)Math.PI/3);
+			}
 
-//			delta_t = System.currentTimeMillis() - time;
-//			time = System.currentTimeMillis();
+			if (!step_physics || skipCounter < skipSteps) {
+				physEngine.collisionDetection((float) delta_t/1000f);
+				pe1.calculatePhysics(delta_t/1000f);
+				pe2.calculatePhysics(delta_t/1000f);
+				skipCounter++;
+			}
+			else {
+				Keyboard.next();
 
-			
+				if (Keyboard.getEventCharacter() == 'f') {
+					System.out.println("Pressf");
+
+					if (Keyboard.getEventKeyState()) {
+						//pressed
+						if(released) {
+							physEngine.collisionDetection((float) delta_t/1000f);
+							pe1.calculatePhysics(delta_t/1000f);
+							pe2.calculatePhysics(delta_t/1000f);
+
+						}
+
+						released = false;
+					}
+					else {
+						//released
+						released = true;
+					}
+
+				}
+			}
+
+			delta_t = System.currentTimeMillis() - time;
+			time = System.currentTimeMillis();
 		}
 
-//		renderer.cleanUp();
-//		loader.cleanUp();
+
+		renderer.cleanUp();
+		loader.cleanUp();
 		DisplayManager.closeDisplay();
 
 	}

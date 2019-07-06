@@ -81,6 +81,10 @@ public class KernelVBOProgram extends KernelProgram{
                         if (indices[k] == j) {
                             indices[k] = i;
                         }
+
+                        if (indices[k] > j) {
+                            indices[k]--;
+                        }
                     }
 
                     j--;

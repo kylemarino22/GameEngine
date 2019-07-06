@@ -27,15 +27,18 @@ kernel void collisionDetector (__constant float *uniforms, global const unsigned
     #v1 = uniforms[5] - (v1 - v[1])/uniforms[0];
     #v2 = uniforms[6] - (v2 - v[2])/uniforms[0];
 
-    output[xid*10 + 4] = uniforms[4];
-    output[xid*10 + 5] = uniforms[5];
-    output[xid*10 + 6] = uniforms[6];
+    #output[xid*10 + 4] = uniforms[4];
+    #output[xid*10 + 5] = uniforms[5];
+    #output[xid*10 + 6] = uniforms[6];
     output[xid*10 + 7] = normals[3*xid];
     output[xid*10 + 8] = normals[3*xid + 1];
     output[xid*10 + 9] = normals[3*xid + 2];
 
     #Check if normal faces velocity vector, invert normal vector
     float den = normals[3*xid] * uniforms[4] + normals[3*xid + 1] * uniforms[5] + normals[3*xid + 2] * uniforms[6];
+
+    output[xid*10 + 6] = den;
+
     if (den >= 0) {
         output[xid*10] = FLT_MAX;
         return;
@@ -46,10 +49,12 @@ kernel void collisionDetector (__constant float *uniforms, global const unsigned
     float p2 = uniforms[3] - positions[index0 + 2];
 
     float num = normals[3*xid] * p0 + normals[3*xid + 1] * p1 + normals[3*xid + 2] * p2;
-
     #if normal faces point
 
-    if (num < -0.025) {
+    output[xid*10 + 5] = num;
+
+
+    if (num < 0) {
         output[xid*10] = FLT_MAX;
         return;
     }
@@ -58,6 +63,8 @@ kernel void collisionDetector (__constant float *uniforms, global const unsigned
     #calculate t
 
     float t = -num/den;
+    output[xid*10 + 4] = t;
+
 
     if (t > uniforms[0]) {
         output[xid*10] = FLT_MAX;
@@ -68,6 +75,10 @@ kernel void collisionDetector (__constant float *uniforms, global const unsigned
     float c0 = uniforms[1] + uniforms[4] * t;
     float c1 = uniforms[2] + uniforms[5] * t;
     float c2 = uniforms[3] + uniforms[6] * t;
+
+    output[xid*10 + 1] = c0;
+    output[xid*10 + 2] = c1;
+    output[xid*10 + 3] = c2;
 
     #Check Edge 0
     p0 = c0 - positions[index1];
@@ -103,9 +114,6 @@ kernel void collisionDetector (__constant float *uniforms, global const unsigned
 
     #Valid Collision. Store in output
     output[xid*10] = t;
-    output[xid*10 + 1] = c0;
-    output[xid*10 + 2] = c1;
-    output[xid*10 + 3] = c2;
 
 
 }

@@ -116,6 +116,11 @@ public class Maths {
 		return new Vector3f(a.x, a.y, a.z);
 	}
 
+	public static Vector4f to4f (Vector3f a) {
+		float l = a.length();
+		return new Vector4f(a.x/l, a.y/l, a.z/l, l);
+	}
+
 	public static Vector3f toEulerAngles (Vector3f rot) {
 		return new Vector3f(
 				(float) Math.atan2(rot.y,rot.x) ,

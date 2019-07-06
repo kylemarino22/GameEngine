@@ -13,9 +13,9 @@ import java.util.ArrayList;
 public class PhysicsEntity extends Entity implements Physical {
 
     public float mass = 1.0f;
-    public float InertiaTensor = 1;
+    public float InertiaTensor = 1.2f;
 
-    public Vector3f acceleration = new Vector3f(0,0,0);
+    public Vector3f acceleration = new Vector3f(0,0.0f,0);
 
     //TODO: Switch to axis angle?
 

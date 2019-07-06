@@ -78,9 +78,9 @@ public class PhysicsEngine {
                     vertexValidator.run(physE, transformedVertices);
 
                     FloatBuffer validatedVertices = vertexValidator.getOutput();
-//                    System.out.println("============================ VALID VERTICES ============================");
-//                    KernelLoader.print(validatedVertices);
-//                    System.out.println("========================================================================");
+                    KernelLoader.debugPrint("============================ VALID VERTICES ============================");
+                    KernelLoader.print(validatedVertices, 3);
+                    KernelLoader.debugPrint("========================================================================");
 
 
                     //Check if whole array is invalid
@@ -94,7 +94,7 @@ public class PhysicsEngine {
 
                     Vector3f EBasis_axis = Maths.scale(Maths.to3f(physE.omegaVector), physE.omegaVector.w);
                     Vector3f EBasis_OCenter = Vector3f.sub(currentEntity.getPosition(), physE.getPosition(), null);
-                    EBasis_OCenter = physE.totalRot.rotate(EBasis_OCenter);
+                    EBasis_OCenter = physE.totalRot.inverse().rotate(EBasis_OCenter);
                     EBasis_axis = physE.totalRot.rotate(EBasis_axis);
 
                     Vector3f collisionVector = new Vector3f(0,0,0);
@@ -123,8 +123,10 @@ public class PhysicsEngine {
                         Vector3f EBasis_point = Vector3f.sub(WBasis_point, physE.getPosition(), null);
                         Vector3f EBasis_rotVel = Vector3f.cross(EBasis_axis, EBasis_point, null);
 
+                        EBasis_point = physE.totalRot.inverse().rotate(EBasis_point);
                         velocityVec3f = Vector3f.sub(velocityVec3f, physE.velocity, null);
                         velocityVec3f = Vector3f.sub(velocityVec3f, EBasis_rotVel, null);
+                        velocityVec3f = physE.totalRot.inverse().rotate(velocityVec3f);
 
                         /*
                         =============================== Old Velocity Calculation ====================================
@@ -144,8 +146,8 @@ public class PhysicsEngine {
                         //TODO: Clean up collisionDetctor kernel (Easy)
                         collisionDetector.run(delta_t, EBasis_point, velocityVec3f, physE);
                         FloatBuffer collisionVertices = collisionDetector.getOutput();
-//                        System.out.println();
-//                        KernelLoader.print(collisionVertices);
+                        System.out.println();
+                        KernelLoader.print(collisionVertices, 10);
 
                         Vector3f unitNorm = new Vector3f(0,0,0);
                         Vector3f c_location = new Vector3f(0,0,0);
@@ -201,6 +203,7 @@ public class PhysicsEngine {
                     Vector3f OBasis_collsionVertex = Vector3f.sub(EBasis_OCenter, collisionVertex, null);
 
                     //evaluate collision impulse
+                    float c = Vector3f.dot(collisionVelocity, collisionVector);
                     float num = -(1 + elasticity) * Vector3f.dot(collisionVelocity, collisionVector);
 
                     float den = 1/currentEntity.mass + 1/physE.mass
@@ -218,11 +221,59 @@ public class PhysicsEngine {
                     physE.velocity =  Vector3f.sub(physE.velocity ,Maths.scale(WBasis_Norm, jimpulse/physE.mass), null );
 //                            currentEntity.velocity +=
 
+                    //currE rotation calculation
+                    Vector3f currE_w_axis = Maths.scale(Vector3f.cross(OBasis_collsionVertex, Maths.scale(collisionVector, jimpulse), null), 1/currentEntity.InertiaTensor);
+
+                    Vector3f axis;
+                    Vector4f newOmega;
+                    if (currE_w_axis.lengthSquared() != 0) {
+                        Vector3f currE_wf_vector = Vector3f.cross(currE_w_axis, OBasis_collsionVertex, null);
+
+                        axis = Maths.scale(Maths.to3f(currentEntity.omegaVector), currentEntity.omegaVector.w);
+                        Vector3f currE_wo_vector = Vector3f.cross(axis, OBasis_collsionVertex, null);
+
+                        currE_wf_vector = Vector3f.add(currE_wf_vector, currE_wo_vector, null);
+
+                        axis = Vector3f.cross(currE_wf_vector, OBasis_collsionVertex, null);
+
+                        newOmega = Maths.to4f(axis);
+                        newOmega.w *= delta_t;
+
+                        currentEntity.setOmega(newOmega);
+                    }
+
+
+
+                    //physE rotation calculation
+                    Vector3f physE_w_axis = Maths.scale(Vector3f.cross(collisionVertex, Maths.scale(collisionVector, jimpulse), null), 1/physE.InertiaTensor);
+
+                    if (currE_w_axis.lengthSquared() != 0) {
+                        Vector3f physE_wf_vector = Vector3f.cross(physE_w_axis, collisionVertex, null);
+
+                        axis = Maths.scale(Maths.to3f(physE.omegaVector), physE.omegaVector.w);
+                        Vector3f physE_wo_vector = Vector3f.cross(axis, collisionVertex, null);
+
+                        physE_wf_vector = Vector3f.sub(physE_wf_vector, physE_wo_vector, null);
+
+                        axis = Vector3f.cross(physE_wf_vector, collisionVertex, null);
+
+                        newOmega = Maths.to4f(axis);
+                        newOmega.w *= delta_t;
+
+                        physE.setOmega(newOmega);
+                    }
 
 
 
 
 
+
+
+
+
+
+
+//                    currentEntity.omegaRotor = new Rotor3()
 
                 }
             }
@@ -276,7 +327,7 @@ public class PhysicsEngine {
         }
 
         Chunk (Vector3f pos) {
-            this.x =(int) pos.x / CHUNK_X;
+            this.x = (int) pos.x / CHUNK_X;
             this.y = (int) pos.y / CHUNK_Y;
             this.z = (int) pos.z / CHUNK_Z;
         }

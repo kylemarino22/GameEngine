@@ -20,6 +20,8 @@ import static org.lwjgl.opencl.CL10.*;
 
 public abstract class KernelLoader {
 
+    public static boolean debug = false;
+
     private boolean init = false;
     protected CLContext context;
     protected CLCommandQueue queue;
@@ -79,10 +81,22 @@ public abstract class KernelLoader {
         return buf;
     }
 
-    static void print(FloatBuffer buffer) {
+    static void print(FloatBuffer buffer, int size) {
+
+        if (!debug) return;
+
         for (int i = 0; i < buffer.capacity(); i++) {
-            System.out.print(buffer.get(i)+" ");
+            if (i % size == 0) {
+                System.out.println("");
+            }
+            System.out.format("%-15s", buffer.get(i));
         }
         System.out.println("");
+    }
+
+    static void debugPrint (String s) {
+
+        if (!debug) return;
+        System.out.println(s);
     }
 }
