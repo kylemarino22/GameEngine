@@ -1,5 +1,6 @@
 package physicsEngine;
 
+import models.RawModel;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opencl.CLMem;
 
@@ -22,21 +23,27 @@ public class KernelVBOProgram extends KernelProgram{
     }
 
     public void enqueueUniforms () {
-        FloatBuffer buf = uniformLoader.genUniformArrays();
-        loadMemory(0,buf, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR);
+        uniformLoader.genUniformArrays(memoryBuffer.get(0));
+        loadMemory(0);
     }
 
     public void enqueueVAO (int id, int location, int index) {
         cl_vbo vbo = vbos.get(id);
         loadMemory(location, vbo.vao.get(index));
+    }
 
+    public void dequeueVAO (int location) {
+        unloadMemory(location);
     }
 
     public int getFaceCount (int id) {
         return vbos.get(id).faceCount;
     }
 
-    public static int createVAO(float[] positions, float[] normals, int[] indices, float[] edgeNormals) {
+    public static void createVAO(float[] positions, float[] normals, int[] indices, float[] edgeNormals, RawModel model) {
+
+        //Set faceCount through index length
+        model.setFaceCount(indices.length);
 
         ArrayList<Float> validPositions = new ArrayList<>();
         for (float i : positions) {
@@ -50,6 +57,9 @@ public class KernelVBOProgram extends KernelProgram{
             positions[i] = validPositions.get(i);
         }
 
+        //Set vertexCount through validPositions length
+        model.setVertexCount(positions.length/3);
+
         for (KernelVBOProgram k :kernelList) {
             cl_vbo objToLoad = new cl_vbo(k, indices.length/3);
             objToLoad.storeDataInAttributeList(0, indices);
@@ -58,7 +68,9 @@ public class KernelVBOProgram extends KernelProgram{
             objToLoad.storeDataInAttributeList(3, edgeNormals);
             k.vbos.add(objToLoad);
         }
-        return kernelList.get(0).vbos.size() - 1;
+
+        //Set CL_vaoID though kernelList vbo count
+        model.setCl_vaoID(kernelList.get(0).vbos.size() - 1);
     }
 
     private static int[] preProcessVertices (ArrayList<Float> validPositions, int[] indices) {

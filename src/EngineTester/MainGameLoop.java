@@ -38,7 +38,7 @@ public class MainGameLoop {
 
 	public static void main(String[] args) {
 
-		final boolean step_physics = false;
+		final boolean step_physics = true;
 
 		final int skipSteps = 0;
 
@@ -81,9 +81,9 @@ public class MainGameLoop {
 //		pe1.acceleration.y = 0.1f;
 //		pe2.acceleration.y = 0.05f;
 
-		pe1.velocity.y = 0.5f;
+		pe1.velocity.y = 5f;
 
-		pe2.velocity.y = -0.5f;
+		pe2.velocity.y = -5f;
 
 
 		Light light =  new Light(new Vector3f(-10000,20000,10000), new Vector3f(1,1,1));
@@ -145,11 +145,11 @@ public class MainGameLoop {
 
 			if (Keyboard.isKeyDown(Keyboard.KEY_R)) {
 				//reset
-				pe1.setPosition(new Vector3f(0f,-3f,-25));
-				pe2.setPosition(new Vector3f(0,3f,-25));
+				pe1.setPosition(new Vector3f(0f,-30f,-25));
+				pe2.setPosition(new Vector3f(0,30f,-25));
 
-				pe1.velocity = new Vector3f(0,0.5f,0);
-				pe2.velocity = new Vector3f(0,-0.5f,0);
+				pe1.velocity = new Vector3f(0,10f,0);
+				pe2.velocity = new Vector3f(0,-10f,0);
 
 				pe1.omegaRotor = new Rotor3();
 				pe2.omegaRotor = new Rotor3();

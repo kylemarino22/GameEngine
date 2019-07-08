@@ -1,21 +1,12 @@
 package physicsEngine;
 
-import entities.Entity;
 import entities.PhysicsEntity;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.util.vector.Matrix;
-import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 import toolbox.Maths;
-import toolbox.Rotor3;
 
-import java.lang.reflect.Array;
 import java.nio.FloatBuffer;
 import java.util.*;
-
-import static org.lwjgl.opencl.CL10.CL_MEM_COPY_HOST_PTR;
-import static org.lwjgl.opencl.CL10.CL_MEM_WRITE_ONLY;
 
 public class PhysicsEngine {
 
@@ -46,7 +37,7 @@ public class PhysicsEngine {
 
     public PhysicsEngine () {
         vertexTransformer = new VectorTransformProgram(vectorTransformerFile);
-        vertexValidator = new VertexValidatorProgram(vertexValidatorFile);
+        vertexValidator = new VertexValidatorProgram(vertexValidatorFile, vertexTransformer.memoryBuffer.get(2));
         collisionDetector = new CollisionDetectorProgram(collisionDetectorFile);
     }
 
@@ -65,28 +56,28 @@ public class PhysicsEngine {
 
                 PhysicsEntity currentEntity = (PhysicsEntity) chunkList.get(i);
 
-                vertexTransformer.run(currentEntity, 1,
-                        currentEntity.getModel().getRawModel().getVertexCount());
+                int currEVertexCount = currentEntity.getModel().getRawModel().getVertexCount();
+                vertexTransformer.run(currentEntity, 1, currEVertexCount);
 
-                FloatBuffer transformedVertices = vertexTransformer.getOutput();
-//                KernelLoader.print(transformedVertices);
+                vertexTransformer.getOutput();
+//                KernelLoader.print(vertexTransformer.memoryBuffer.get(2), 3);
 
                 //for E
                 for (PhysicsEntity physE: pceList ) {
 
                     //for Verticies of O
-                    vertexValidator.run(physE, transformedVertices);
+                    vertexValidator.run(physE, currEVertexCount);
 
-                    FloatBuffer validatedVertices = vertexValidator.getOutput();
+                    vertexValidator.getOutput();
                     KernelLoader.debugPrint("============================ VALID VERTICES ============================");
-                    KernelLoader.print(validatedVertices, 3);
+                    KernelLoader.print(vertexValidator.memoryBuffer.get(2), 3);
                     KernelLoader.debugPrint("========================================================================");
 
 
                     //Check if whole array is invalid
                     boolean noValidVertex = true;
-                    for (int j = 0; j < validatedVertices.capacity()/3; j++) {
-                        if (validatedVertices.get(3*j) != Float.MAX_VALUE) noValidVertex = false;
+                    for (int j = 0; j < currEVertexCount; j++) {
+                        if (vertexValidator.memoryBuffer.get(2).get(3*j) != Float.MAX_VALUE) noValidVertex = false;
                     }
                     if (noValidVertex) break;
 
@@ -104,15 +95,15 @@ public class PhysicsEngine {
                     int cnumSum = 0;
 
                     //for valid vertex of O
-                    for (int j = 0; j < validatedVertices.capacity()/3; j++) {
-                        if (validatedVertices.get(3*j) == Float.MAX_VALUE) { continue; }
+                    for (int j = 0; j < currEVertexCount; j++) {
+                        if (vertexValidator.memoryBuffer.get(2).get(3*j) == Float.MAX_VALUE) { continue; }
 
                         //TODO: Could Be optimized by moving validated vertex transformations to a gpu kernel
                         //Create velocity vector
                         Vector3f WBasis_point = new Vector3f(
-                                validatedVertices.get(3*j),
-                                validatedVertices.get(3*j+1),
-                                validatedVertices.get(3*j+2));
+                                vertexValidator.memoryBuffer.get(2).get(3*j),
+                                vertexValidator.memoryBuffer.get(2).get(3*j+1),
+                                vertexValidator.memoryBuffer.get(2).get(3*j+2));
                         Vector3f OBasis_point = Vector3f.sub(WBasis_point, currentEntity.getPosition(), null);
                         Vector3f axis = Maths.scale(Maths.to3f(currentEntity.omegaVector), currentEntity.omegaVector.w);
                         Vector3f velocityVec3f = Vector3f.cross(axis, OBasis_point, null);

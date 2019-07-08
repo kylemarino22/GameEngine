@@ -37,13 +37,14 @@ public class Loader {
 
 		unbindVAO();
 
-		int cl_vaoID = -1;
+		RawModel model = new RawModel(vaoID, radius);
+
 		if (radius > 0) {
 			float[] edgeNormals = new float[indices.length * 3];
 			normals = generateNormals(positions, indices, edgeNormals);
-			cl_vaoID = KernelVBOProgram.createVAO(positions, normals, indices, edgeNormals);
+			KernelVBOProgram.createVAO(positions, normals, indices, edgeNormals, model);
 		}
-		return new RawModel(vaoID, cl_vaoID, indices.length, radius);
+		return model;
 	}
 	
 	public int loadTexture(String fileName){

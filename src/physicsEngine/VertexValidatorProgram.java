@@ -14,8 +14,14 @@ public class VertexValidatorProgram  extends KernelVBOProgram {
 
     private FloatBuffer out;
 
-    VertexValidatorProgram (String file) {
+    VertexValidatorProgram (String file, FloatBuffer transformedVertices) {
         super(file);
+
+        //kernel memory
+        createCLMem(1);
+        createFromMemoryBuffer(transformedVertices);
+        createOutCLMem();
+        loadMemory(2);
 
         //setup uniforms
         uniformLoader.initUniform(null, 1); //E max radius
@@ -23,20 +29,21 @@ public class VertexValidatorProgram  extends KernelVBOProgram {
 
     }
 
-    public void run(Entity e, FloatBuffer vertices) {
+    public void run(Entity e, int size) {
         float rad = e.getModel().getRawModel().getRadius();
         float scale = e.getScale();
+
+        //1.01 times to encapsulate edge vertices
         uniformLoader.loadUniform(0, rad*rad*scale*scale * 1.01f);
         uniformLoader.loadUniform(1, e.getPosition());
         enqueueUniforms();
-        loadMemory(1, vertices);
-        out = BufferUtils.createFloatBuffer(vertices.capacity());
-        loadMemory(2,out, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR);
-        executeKernel(vertices.capacity());
+        loadMemory(1);
+
+        executeKernel(size);
     }
 
     public FloatBuffer getOutput () {
-        getBuffer(2,out);
+        getBuffer(2);
         return out;
     }
 }

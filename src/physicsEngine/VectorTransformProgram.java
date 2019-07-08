@@ -1,7 +1,6 @@
 package physicsEngine;
 
 import entities.PhysicsEntity;
-import models.RawModel;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Matrix4f;
 import toolbox.Maths;
@@ -18,6 +17,13 @@ public class VectorTransformProgram extends KernelVBOProgram{
     VectorTransformProgram(String file) {
         super(file);
 
+        //setup memory buffers
+
+        createCLMem(1);
+        kernelMemory.add(1,null);
+        createOutCLMem();
+        loadMemory(2);
+
         //setup uniforms
         uniformLoader.initUniform(null, 16); //Object transform
 
@@ -30,13 +36,11 @@ public class VectorTransformProgram extends KernelVBOProgram{
         enqueueUniforms();
         int vaoID = physE.getModel().getRawModel().getCl_vaoID();
         enqueueVAO(vaoID, 1, vaoIndex);
-        out = BufferUtils.createFloatBuffer(size);
-        loadMemory(2,out, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR);
         executeKernel(size);
     }
 
     public FloatBuffer getOutput () {
-        getBuffer(2,out);
-        return out;
+        getBuffer(2);
+        return memoryBuffer.get(2);
     }
 }

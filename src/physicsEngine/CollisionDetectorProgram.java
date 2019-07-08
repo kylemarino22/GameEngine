@@ -33,15 +33,6 @@ public class CollisionDetectorProgram extends KernelVBOProgram{
         uniformLoader.loadUniform(1, vec);
         uniformLoader.loadUniform(2, velocity);
 
-//        Matrix4f transformationMatrix = Maths.createTransformationMatrix(
-//                Maths.scale(E.velocity, delta_t),
-//                E.omegaVector.x * delta_t,
-//                E.omegaVector.y * delta_t,
-//                E.omegaVector.z * delta_t,
-//                E.getScale());
-//        uniformLoader.loadUniform(3, transformationMatrix);
-
-
         enqueueUniforms();
 
         int vaoID = E.getModel().getRawModel().getCl_vaoID();
@@ -51,13 +42,18 @@ public class CollisionDetectorProgram extends KernelVBOProgram{
         enqueueVAO(vaoID, 4, 3); //EdgeNormals
 
         int size = getFaceCount(vaoID) * 10;
-        out = BufferUtils.createFloatBuffer(size);
-        loadMemory(5, out, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR);
-        executeKernel(size);
+//        out = BufferUtils.createFloatBuffer(size);
+//        loadMemory(5, out, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR);
+//        executeKernel(size);
+//
+//        releaseCLMem(0);
+
     }
 
     public FloatBuffer getOutput () {
-        getBuffer(5,out);
+//        getBuffer(5,out);
+//        releaseCLMem(5);
+//        releaseKernelMem();
         return out;
     }
 }

@@ -9,9 +9,7 @@ import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-import entities.Entity;
 import models.RawModel;
-import models.TexturedModel;
 import shaders.TerrainShader;
 import terrains.Terrain;
 import textures.ModelTexture;
@@ -32,7 +30,7 @@ public class TerrainRenderer {
 		for(Terrain terrain:terrains){
 			prepareTerrain(terrain);
 			loadModelMatrix(terrain);
-			GL11.glDrawElements(GL11.GL_TRIANGLES, terrain.getModel().getVertexCount(),
+			GL11.glDrawElements(GL11.GL_TRIANGLES, terrain.getModel().getFaceCount(),
 					GL11.GL_UNSIGNED_INT, 0);
 			unbindTexturedModel();
 		}
